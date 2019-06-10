@@ -13,10 +13,10 @@ var err error
 func init() {
 
 	mysql_username := beego.AppConfig.String("kg_mysql_name")
-	mysql_password :=  beego.AppConfig.String("kg_mysql_password")
-	mysql_host :=  beego.AppConfig.String("kg_mysql_host")
-	mysql_dbname :=  beego.AppConfig.String("kg_mysql_dbname")
-	//mysql_username+":"+mysql_password+"@tcp("+mysql_host+":3306)/"+mysql_dbname+"?charset=utf8"
+	mysql_password := beego.AppConfig.String("kg_mysql_password")
+	mysql_host := beego.AppConfig.String("kg_mysql_host")
+	mysql_dbname := beego.AppConfig.String("kg_mysql_dbname")
+
 	Db, err = gorm.Open("mysql", mysql_username+":"+mysql_password+"@tcp("+mysql_host+":3306)/"+mysql_dbname+"?charset=utf8")
 
 	if err != nil {
@@ -28,6 +28,5 @@ func init() {
 	Db.DB().SetMaxOpenConns(100)
 
 	// 全局禁用表名复数
-	Db.SingularTable(true) 
+	Db.SingularTable(true)
 }
-
