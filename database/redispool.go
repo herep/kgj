@@ -8,17 +8,19 @@ import (
 )
 
 var (
-	Pool *redis.Pool  //创建redis连接池
+	Pool *redis.Pool //创建redis连接池
 )
-func init(){
+
+func init() {
+	//read conf
 	redis_host := beego.AppConfig.String("kg_redis_host")
-	redis_password :=  beego.AppConfig.String("kg_redis_password")
+	redis_password := beego.AppConfig.String("kg_redis_password")
 	Pool = &redis.Pool{
 
-		MaxIdle: 3,
+		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 
-		Dial: func () (redis.Conn, error) {
+		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", redis_host)
 			if err != nil {
 				fmt.Println(err)
@@ -32,7 +34,7 @@ func init(){
 			if _, err := c.Do("SELECT", "10"); err != nil {
 				c.Close()
 				fmt.Println(err)
-				return nil, err 
+				return nil, err
 			}
 			return c, nil
 		},
@@ -43,8 +45,6 @@ func init(){
 			}
 			_, err := c.Do("PING")
 			return err
-		}, 
+		},
 	}
 }
-
-

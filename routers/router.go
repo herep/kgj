@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	_ "finance/comm"
 	"finance/controllers"
-	_"finance/models"
+	_ "finance/models"
 	"finance/types"
 	_ "fmt"
 	"github.com/astaxie/beego"
@@ -53,17 +53,24 @@ func init() {
 	beego.Router("/register/sendcode", &controllers.RegisterController{}, "post:SendCode")
 	beego.Router("/register/logion", &controllers.RegisterController{}, "post:Register")
 	beego.Router("/register/login", &controllers.RegisterController{}, "post:Login")
+
 	beego.Router("/pay/callback", &controllers.PayController{}, "get:Callback")
+
 	beego.Router("/v1/pay/payweixin", &controllers.PayController{}, "get:Payweixin")
+
 	beego.Router("/v1/strore/ishopname", &controllers.StroreController{}, "post:Ishopname")
 	beego.Router("/v1/strore/shoplist", &controllers.StroreController{}, "post:Shoplist")
 	beego.Router("/v1/strore/changeshop", &controllers.StroreController{}, "post:Changeshop")
+
 	beego.Router("/v1/account/iaccount", &controllers.AccountController{}, "post:Iaccount")
+	beego.Router("/v1/account/uaccount", &controllers.AccountController{}, "post:Uaccount")
+	beego.Router("/v1/account/daccount", &controllers.AccountController{}, "post:Daccount")
+
 	beego.Router("/v1/jurisdiction/ijuinfo", &controllers.JurisdictionController{}, "post:Ijuinfo")
 	beego.Router("/v1/jurisdiction/ujuinfo", &controllers.JurisdictionController{}, "post:Ujurinfo")
 	beego.Router("/v1/jurisdiction/djuinfo", &controllers.JurisdictionController{}, "post:Djurinfo")
 	beego.Router("/v1/jurisdiction/julist", &controllers.JurisdictionController{}, "post:Julist")
 	beego.Router("/v1/jurisdiction/rolelist", &controllers.JurisdictionController{}, "post:Rolelist")
 
-	beego.InsertFilter("/v1/*", beego.BeforeRouter, FilterUser) 
+	beego.InsertFilter("/v1/*", beego.BeforeRouter, FilterUser)
 }

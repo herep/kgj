@@ -33,25 +33,26 @@ type SuccessreInfo struct {
 	Status  int
 	Message string
 	Data    interface{}
-	Code    int 
+	Code    int
 }
 type Pes struct {
-	PsID       int    `json:"ps_id"`
-	PsName     string `json:"ps_name"`
-	PsPid      int `json:"ps_pid"`
-	PsC        string `json:"ps_c"`
-	PsA        string `json:"ps_a"`
-	PsLevel    int64  `json:"ps_level"`
-	CreateTime int64  `json:"create_time"`
-	UpdateTime int64  `json:"update_time"`
-	DeleteTime int64  `json:"delete_time"`
-	Children   map[int]Per  `json:"children"`
+	PsID       int         `json:"ps_id"`
+	PsName     string      `json:"ps_name"`
+	PsPid      int         `json:"ps_pid"`
+	PsC        string      `json:"ps_c"`
+	PsA        string      `json:"ps_a"`
+	PsLevel    int64       `json:"ps_level"`
+	CreateTime int64       `json:"create_time"`
+	UpdateTime int64       `json:"update_time"`
+	DeleteTime int64       `json:"delete_time"`
+	Children   map[int]Per `json:"children"`
 }
 
+//
 type Per struct {
 	PsID       int    `json:"ps_id"`
 	PsName     string `json:"ps_name"`
-	PsPid      int `json:"ps_pid"`
+	PsPid      int    `json:"ps_pid"`
 	PsC        string `json:"ps_c"`
 	PsA        string `json:"ps_a"`
 	PsLevel    int64  `json:"ps_level"`

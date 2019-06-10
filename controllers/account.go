@@ -26,7 +26,7 @@ func (this *AccountController) Iaccount() {
 		fmt.Println(err)
 	}
 
-	////验证器
+	//验证器
 	v := validation.Validation{}
 	v.Required(info["AccountPas"], "account_pas").Message("密码不可以为空")
 	v.Required(info["AccountName"], "account_name").Message("子帐号名称不可以为空！")
@@ -52,18 +52,18 @@ func (this *AccountController) Iaccount() {
 		info["AccountCompany"] = Cinfo[0].Id
 
 		//相同电话不可以重复注册
-		res,_ := models.Newaccount().Saccount(info["AccountNum"].(string))
+		res, _ := models.Newaccount().Saccount(info["AccountNum"].(string))
 
-		if res{
+		if res {
 			//不允许 新增
 			this.Data["json"] = types.Successre{Status: 400, Message: "电话以绑定帐号", Code: -1}
-		}else{
+		} else {
 
 			ac, acid := models.Newaccount().Iaccount(info) //新增子帐号主键
 
 			if ac {
 				//维护 主-子关系
-				uainfo := models.Uafiliation{UserId: Cinfo[0].Id, AccountId: acid,UserName:info["AccountName"].(string),UserMailbox:info["AccountMailbox"].(string),UserPhone: info["AccountNum"].(string),Status:1}
+				uainfo := models.Uafiliation{UserId: Cinfo[0].Id, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
 				ua := models.Newuafiliation().Iuainfo(uainfo)
 				if ua {
 					this.Data["json"] = types.Successre{Status: 200, Message: "子帐号新增成功", Code: 1}
@@ -81,3 +81,88 @@ func (this *AccountController) Iaccount() {
 }
 
 //子帐号 -- 修改
+func (this *AccountController) Uaccount() {
+
+	//获取 参数
+	var info models.Account
+	var err error
+	err = json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//验证器
+	v := validation.Validation{}
+	v.Required(info.Id, "user_id").Message("请选择修改子帐号")
+
+	//验证器 错误信息
+	if v.HasErrors() {
+
+		var message string
+		for _, err := range v.Errors {
+			message = err.Message + ""
+		}
+		this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
+	} else {
+
+		//是否存在 信息
+		_, result := models.Newaccount().IdGetInfo(info.Id)
+		if result {
+			//修改数据
+			errs := models.Newaccount().Uinfo(info)
+			if errs {
+				this.Data["json"] = types.Successre{Status: 200, Message: "修改成功", Code: 1}
+			} else {
+				this.Data["json"] = types.Successre{Status: 400, Message: "修改出错，服务器内部错误", Code: -1}
+			}
+
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "修改子账户不存在", Code: -1}
+		}
+	}
+
+	this.ServeJSON()
+}
+
+//子帐号 删除
+func (this *AccountController) Daccount() {
+
+	//接受 参数
+	var info models.Account
+	var err error
+	err = json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//验证器
+	v := validation.Validation{}
+	v.Required(info.Id, "id").Message("请选择删除信息")
+
+	if v.HasErrors() {
+
+		var message string
+		for _, err := range v.Errors {
+			message = err.Message + ""
+		}
+		this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
+	} else {
+
+		//是否存在 信息
+		_, result := models.Newaccount().IdGetInfo(info.Id)
+		if result {
+			//修改数据
+			errs := models.Newaccount().Dinfo(info)
+			if errs {
+				this.Data["json"] = types.Successre{Status: 200, Message: "修改成功", Code: 1}
+			} else {
+				this.Data["json"] = types.Successre{Status: 400, Message: "修改出错，服务器内部错误", Code: -1}
+			}
+
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "修改子账户不存在", Code: -1}
+		}
+	}
+	this.ServeJSON()
+}

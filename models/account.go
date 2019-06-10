@@ -83,8 +83,42 @@ func (A *Account) Checkacinfo(ac_name string, field string) (data Account, res b
 	}
 }
 
-//查询子帐号 -- 对应权限
-//func (A *Account) IdGetInfo(userid string) (info Account) {
-//
-//	//err := Db.Table("kg_account").Select("").Where("id = ?", userid).Joins("left join kg_role on kg_role.id = kg_account.account_role").Row();
-//}
+//查询子帐号
+func (A *Account) IdGetInfo(userid int) (info Account, res bool) {
+
+	err := Db.Table("kg_account").Where("id = ?", userid).Find(&info)
+
+	if info.Id != 0 {
+
+		return info, true
+	} else {
+		fmt.Println(err)
+		return info, false
+	}
+}
+
+//修改子账户
+func (A *Account) Uinfo(info Account) (res bool) {
+
+	//整合 修改数据
+	info.UpdateTime = time.Now().Unix()
+	err := Db.Table("kg_account").Where("id = ? ", info.Id).Update(info)
+
+	if err.Error != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+//删除子账户
+func (A *Account) Dinfo(info Account) (res bool) {
+
+	err := Db.Table("kg_account").Where("id = ? ", info.Id).Delete(&info)
+
+	if err.Error != nil {
+		return false
+	} else {
+		return true
+	}
+}

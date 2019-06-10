@@ -20,9 +20,9 @@ func Newuafiliation() *Uafiliation {
 }
 
 //判断 主子帐号
-func (U *Uafiliation) Suainfo(userPhone string,field string) (info []Uafiliation, err bool) {
+func (U *Uafiliation) Suainfo(userPhone string, field string) (info []Uafiliation, err bool) {
 
-	sql := Db.Table("kg_uafiliation").Where(field +"= ? ", userPhone).Find(&info)
+	sql := Db.Table("kg_uafiliation").Where(field+"= ? ", userPhone).Find(&info)
 
 	if len(info) != 0 {
 		return info, true

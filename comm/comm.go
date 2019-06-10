@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-
-
 //随机 生成六位数
 func GetSix() (code string) {
 	return fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000))
@@ -39,11 +37,11 @@ func Request(phone string, code string) (info []byte) {
 	param := url.Values{}
 
 	//配置请求参数,方法内部已处理urlencode问题,中文参数可以直接传参
-	param.Set("mobile", phone)                           //接收短信的手机号码
-	param.Set("tpl_id", "00000")                        //短信模板ID，请参考个人中心短信模板设置
-	param.Set("tpl_value", "00000000"+code)               //变量名和变量值对。如果你的变量名或者变量值中带有#&amp;=中的任意一个特殊符号，请先分别进行urlencode编码后再传递，&lt;a href=&quot;http://www.juhe.cn/news/index/id/50&quot; target=&quot;_blank&quot;&gt;详细说明&gt;&lt;/a&gt;
+	param.Set("mobile", phone)                    //接收短信的手机号码
+	param.Set("tpl_id", "00000")                  //短信模板ID，请参考个人中心短信模板设置
+	param.Set("tpl_value", "00000000"+code)       //变量名和变量值对。如果你的变量名或者变量值中带有#&amp;=中的任意一个特殊符号，请先分别进行urlencode编码后再传递，&lt;a href=&quot;http://www.juhe.cn/news/index/id/50&quot; target=&quot;_blank&quot;&gt;详细说明&gt;&lt;/a&gt;
 	param.Set("key", "0000000000000000000000000") //应用APPKEY(应用详细页查询)
-	param.Set("dtype", "json")                           //返回数据的格式,xml或json，默认json
+	param.Set("dtype", "json")                    //返回数据的格式,xml或json，默认json
 
 	//发送请求
 	data, err := Post(juheURL, param)
@@ -55,7 +53,6 @@ func Request(phone string, code string) (info []byte) {
 	}
 	return data
 }
-
 
 //token---获取个人信息
 func GetTokeninfo(ctx *context.Context) (message []models.KgUser) {

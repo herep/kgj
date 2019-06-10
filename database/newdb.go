@@ -12,13 +12,12 @@ var err error
 
 func init() {
 
-	//read conf
 	mysql_username := beego.AppConfig.String("kg_mysql_name")
 	mysql_password := beego.AppConfig.String("kg_mysql_password")
 	mysql_host := beego.AppConfig.String("kg_mysql_host")
 	mysql_dbname := beego.AppConfig.String("kg_mysql_dbname")
 
-	Db, err = gorm.Open("mysql", mysql_username+":"+mysql_password+"@tcp("+mysql_host+":3306)/"+mysql_dbname+"?charset=utf8")
+	Db, err = gorm.Open("mysql", mysql_username+":"+mysql_password+"@tcp("+mysql_host+":3306)/"+mysql_dbname+"?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
 		fmt.Println(err)
