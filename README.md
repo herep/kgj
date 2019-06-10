@@ -1,7 +1,7 @@
 # gokgj
 
-###简介：基于 go beego搭建erp
-####注意：配置文件模板
+### 简介：基于 go beego搭建erp
+#### 注意：配置文件模板
 
 需要在项目更目录创建  /conf/app.conf 文件
 
@@ -19,7 +19,7 @@ kg_mysql_dbname =
 kg_redis_host = 
 kg_redis_password = 
 ```
-#####2019-06-10 
+##### 2019-06-10 
 ````
 主子帐号管理，权限管理，权限分配
 ````
