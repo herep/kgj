@@ -12,6 +12,7 @@ var err error
 
 func init() {
 
+	//read conf
 	mysql_username := beego.AppConfig.String("kg_mysql_name")
 	mysql_password := beego.AppConfig.String("kg_mysql_password")
 	mysql_host := beego.AppConfig.String("kg_mysql_host")
