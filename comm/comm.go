@@ -3,6 +3,7 @@ package comm
 import (
 	"finance/models"
 	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
@@ -30,18 +31,23 @@ func Post(apiURL string, params url.Values) (rs []byte, err error) {
 
 //发短信接口
 func Request(phone string, code string) (info []byte) {
+
+	//read -- conf
+	urls := beego.AppConfig.String("smsconf_url")
+	tpl_id := beego.AppConfig.String("smsconf_tpl_id")
+	key := beego.AppConfig.String("smsconf_key")
 	//请求地址
-	juheURL := "http://herex.cn/sms/send"
+	juheURL := urls
 
 	//初始化参数
 	param := url.Values{}
 
 	//配置请求参数,方法内部已处理urlencode问题,中文参数可以直接传参
-	param.Set("mobile", phone)                    //接收短信的手机号码
-	param.Set("tpl_id", "00000")                  //短信模板ID，请参考个人中心短信模板设置
-	param.Set("tpl_value", "00000000"+code)       //变量名和变量值对。如果你的变量名或者变量值中带有#&amp;=中的任意一个特殊符号，请先分别进行urlencode编码后再传递，&lt;a href=&quot;http://www.juhe.cn/news/index/id/50&quot; target=&quot;_blank&quot;&gt;详细说明&gt;&lt;/a&gt;
-	param.Set("key", "0000000000000000000000000") //应用APPKEY(应用详细页查询)
-	param.Set("dtype", "json")                    //返回数据的格式,xml或json，默认json
+	param.Set("mobile", phone)             //接收短信的手机号码
+	param.Set("tpl_id", tpl_id)            //短信模板ID，请参考个人中心短信模板设置
+	param.Set("tpl_value", "#code#="+code) //变量名和变量值对。如果你的变量名或者变量值中带有#&amp;=中的任意一个特殊符号，请先分别进行urlencode编码后再传递，&lt;a href=&quot;http://www.juhe.cn/news/index/id/50&quot; target=&quot;_blank&quot;&gt;详细说明&gt;&lt;/a&gt;
+	param.Set("key", key)                  //应用APPKEY(应用详细页查询)
+	param.Set("dtype", "json")             //返回数据的格式,xml或json，默认json
 
 	//发送请求
 	data, err := Post(juheURL, param)
