@@ -52,7 +52,10 @@ func (this *RegisterController) SendCode() {
 			result := comm.Request(phone, Sixcode)
 
 			var netReturn map[string]interface{}
-			json.Unmarshal(result, &netReturn)
+			err := json.Unmarshal(result, &netReturn)
+			if err != nil {
+				fmt.Println(err)
+			}
 
 			if netReturn["error_code"] == 0 {
 				//入库信息
@@ -145,50 +148,69 @@ func (this *RegisterController) Register() {
 			}
 			this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
 		} else {
-			//不可以重复注册
+			//手机号 -- 不可以重复注册
 			companys := models.NewUser().Checkuser(admin_num)
 			if len(companys) == 0 {
-				//验证通过
-				bindcode := models.NewBindcode().CheckBinde(phone_num)
+				//邮箱 -- 不可以重复注册
+				mailboxinfo := models.NewUser().Checkmailboxuser(mailbox)
+				if len(mailboxinfo) == 0 {
+					//用户名 -- 不可以重复注册
+					nameinfo := models.NewUser().Checknameuser(mailbox)
+					if len(nameinfo) == 0 {
+						//验证通过
+						bindcode := models.NewBindcode().CheckBinde(phone_num)
 
-				if len(bindcode) == 0 {
-					this.Data["json"] = types.Successre{Status: 400, Message: "手机号错误1", Code: -1}
-				} else {
-					if bindcode[0].Verifycode == code {
-
-						ntime := time.Now().Unix() // 当前时间
-						data := []byte(password)
-						pas := md5.Sum(data)
-						md5str := fmt.Sprintf("%x", pas)
-
-						//验证码 过期
-						if bindcode[0].Expirytime > ntime {
-							//整合数据
-							info := map[string]interface{}{
-								"company_name": company_name,
-								"admin_num":    admin_num,
-								"admin_name":   admin_name,
-								"password":     md5str,
-								"phone_num":    phone_num,
-								"mailbox":      mailbox,
-								"create_time":  ntime,
-								"consent":      consent,
-							}
-
-							res := models.NewUser().Insertv(info)
-
-							if res {
-								this.Data["json"] = types.Successre{Status: 200, Message: "注册成功", Code: 0}
-							} else {
-								this.Data["json"] = types.Successre{Status: 400, Message: "服务器内部错误", Code: -1}
-							}
+						if len(bindcode) == 0 {
+							this.Data["json"] = types.Successre{Status: 400, Message: "手机号错误", Code: -1}
 						} else {
-							this.Data["json"] = types.Successre{Status: 400, Message: "验证码过期", Code: -1}
-						}
+							if bindcode[0].Verifycode == code {
 
+								ntime := time.Now().Unix() // 当前时间
+								data := []byte(password)
+								pas := md5.Sum(data)
+								md5str := fmt.Sprintf("%x", pas)
+
+								//验证码 过期
+								if bindcode[0].Expirytime > ntime {
+									//整合数据
+									info := map[string]interface{}{
+										"company_name": company_name,
+										"admin_num":    admin_num,
+										"admin_name":   admin_name,
+										"password":     md5str,
+										"phone_num":    phone_num,
+										"mailbox":      mailbox,
+										"create_time":  ntime,
+										"consent":      consent,
+									}
+
+									res, id := models.NewUser().Insertv(info)
+
+									if res {
+										//维护 关系 表
+										uainfo := models.Uafiliation{UserId: id, AccountId: 0, UserName: info["admin_name"].(string), UserMailbox: info["mailbox"].(string), UserPhone: info["admin_num"].(string), Status: 1}
+										ua := models.Newuafiliation().Iuainfo(uainfo)
+										if ua {
+											this.Data["json"] = types.Successre{Status: 200, Message: "注册成功", Code: 0}
+										} else {
+											this.Data["json"] = types.Successre{Status: 400, Message: "关系表维护失败，请联系管理员", Code: -1}
+										}
+									} else {
+										this.Data["json"] = types.Successre{Status: 400, Message: "服务器内部错误", Code: -1}
+									}
+								} else {
+									this.Data["json"] = types.Successre{Status: 400, Message: "验证码过期", Code: -1}
+								}
+
+							} else {
+								this.Data["json"] = types.Successre{Status: 400, Message: "验证码错误", Code: -1}
+							}
+						}
 					} else {
-						this.Data["json"] = types.Successre{Status: 400, Message: "验证码错误", Code: -1}
+						this.Data["json"] = types.Successre{Status: 400, Message: "用户名已经绑定公司", Code: -1}
 					}
+				} else {
+					this.Data["json"] = types.Successre{Status: 400, Message: "邮箱已经绑定公司", Code: -1}
 				}
 			} else {
 				this.Data["json"] = types.Successre{Status: 400, Message: "手机号已经绑定公司", Code: -1}
@@ -255,7 +277,6 @@ func (this *RegisterController) Login() {
 
 				//登录---查询
 				Acinfo, err := models.Newaccount().Checkacinfo(ob.AdminNum, field)
-
 
 				if !err {
 					this.Data["json"] = types.Successre{Status: 400, Message: "用户信息不存在", Code: -1}

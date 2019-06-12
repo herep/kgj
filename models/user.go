@@ -1,6 +1,7 @@
 package models
 
 import (
+	. "finance/database"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 )
@@ -13,7 +14,7 @@ type KgUser struct {
 	AdminName   string `json:"admin_name"`
 	PhoneNum    string `json:"phone_num"`
 	Mailbox     string `json:"mailbox"`
-	CreateTime  string `json:"create_time"`
+	CreateTime  int64  `json:"create_time"`
 	UpdateTime  string `json:"update_time"`
 	Consent     int    `json:"consent"`
 }
@@ -23,35 +24,31 @@ func NewUser() *KgUser {
 }
 
 //注册信息入库
-func (U *KgUser) Insertv(info map[string]interface{}) (res bool) {
+func (U *KgUser) Insertv(info map[string]interface{}) (res bool, id int) {
 
 	//入库数据
-	company_name := info["company_name"].(string)
-	admin_num := info["admin_num"].(string)
-	admin_name := info["admin_name"].(string)
-	password := info["password"].(string)
-	phone_num := info["phone_num"].(string)
-	mailbox := info["mailbox"].(string)
-	create_time := info["create_time"].(int64)
-	consent := info["consent"].(string)
+	var insert KgUser
+	insert.CompanyName = info["company_name"].(string)
+	insert.AdminNum = info["admin_num"].(string)
+	insert.AdminName = info["admin_name"].(string)
+	insert.Password = info["password"].(string)
+	insert.PhoneNum = info["phone_num"].(string)
+	insert.Mailbox = info["mailbox"].(string)
+	insert.CreateTime = info["create_time"].(int64)
+	insert.Consent = info["consent"].(int)
 
+	err := Db.Table("kg_account").Create(&insert)
 
-	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.InsertInto("kg_user", "kg_user.company_name,kg_user.admin_num,kg_user.admin_name,kg_user.password,"+
-		"kg_user.phone_num,kg_user.mailbox,kg_user.create_time,kg_user.consent").Values("?", "?", "?", "?", "?", "?", "?", "?")
-	sql := qb.String()
+	if err.Error != nil {
+		return false, 0
+	} else {
 
-	//执行
-	o := orm.NewOrm()
-	if _, error := o.Raw(sql, company_name, admin_num, admin_name, password, phone_num, mailbox, create_time, consent).Exec(); error != nil {
-		fmt.Println(error)
-		return false
+		return true, insert.Id
 	}
-	return true
 }
 
 //验证账户密码
-func (U *KgUser) Checkuser(username string,) []KgUser {
+func (U *KgUser) Checkuser(username string) []KgUser {
 	//存储信息
 	var userinfo []KgUser
 
@@ -71,8 +68,8 @@ func (U *KgUser) Checkuser(username string,) []KgUser {
 	return userinfo
 }
 
-//验证账户密码 -- 字段名可变
-func (U *KgUser) Checkfuser(username string,field string) []KgUser {
+//验证账户密码
+func (U *KgUser) Checkmailboxuser(mailbox string) []KgUser {
 	//存储信息
 	var userinfo []KgUser
 
@@ -80,7 +77,49 @@ func (U *KgUser) Checkfuser(username string,field string) []KgUser {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("*").
 		From("kg_user").
-		Where(field+" = ?")
+		Where("account_mailbox = ?")
+
+	sql := qb.String()
+
+	//执行
+	o := orm.NewOrm()
+	if _, err := o.Raw(sql, mailbox).QueryRows(&userinfo); err != nil {
+		fmt.Println(err)
+	}
+	return userinfo
+}
+
+//验证账户密码
+func (U *KgUser) Checknameuser(name string) []KgUser {
+	//存储信息
+	var userinfo []KgUser
+
+	//查询
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("kg_user").
+		Where("account_name = ?")
+
+	sql := qb.String()
+
+	//执行
+	o := orm.NewOrm()
+	if _, err := o.Raw(sql, name).QueryRows(&userinfo); err != nil {
+		fmt.Println(err)
+	}
+	return userinfo
+}
+
+//验证账户密码 -- 字段名可变
+func (U *KgUser) Checkfuser(username string, field string) []KgUser {
+	//存储信息
+	var userinfo []KgUser
+
+	//查询
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("kg_user").
+		Where(field + " = ?")
 
 	sql := qb.String()
 
@@ -107,7 +146,7 @@ func (U *KgUser) IdGetInfo(userid float64) []KgUser {
 	//执行
 	o := orm.NewOrm()
 	if _, err := o.Raw(sql, userid).QueryRows(&userinfo); err != nil {
-		fmt.Println(err) 
+		fmt.Println(err)
 	}
 	return userinfo
 }

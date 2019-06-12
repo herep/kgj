@@ -49,31 +49,34 @@ func (this *AccountController) Iaccount() {
 
 		//此时登录 主帐号
 		Cinfo := comm.GetTokeninfo(this.Ctx)
-		info["AccountCompany"] = Cinfo[0].Id
+		if len(Cinfo) != 0 {
+			info["AccountCompany"] = Cinfo[0].Id
+			//相同电话不可以重复注册
+			res, _ := models.Newaccount().Saccount(info["AccountNum"].(string))
 
-		//相同电话不可以重复注册
-		res, _ := models.Newaccount().Saccount(info["AccountNum"].(string))
-
-		if res {
-			//不允许 新增
-			this.Data["json"] = types.Successre{Status: 400, Message: "电话以绑定帐号", Code: -1}
-		} else {
-
-			ac, acid := models.Newaccount().Iaccount(info) //新增子帐号主键
-
-			if ac {
-				//维护 主-子关系
-				uainfo := models.Uafiliation{UserId: Cinfo[0].Id, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
-				ua := models.Newuafiliation().Iuainfo(uainfo)
-				if ua {
-					this.Data["json"] = types.Successre{Status: 200, Message: "子帐号新增成功", Code: 1}
-				} else {
-					this.Data["json"] = types.Successre{Status: 400, Message: "主子帐号维护失败，请联系管理员", Code: -1}
-				}
-
+			if res {
+				//不允许 新增
+				this.Data["json"] = types.Successre{Status: 400, Message: "电话已绑定帐号", Code: -1}
 			} else {
-				this.Data["json"] = types.Successre{Status: 400, Message: "新增失败，请联系管理员", Code: -1}
+
+				ac, acid := models.Newaccount().Iaccount(info) //新增子帐号主键
+
+				if ac {
+					//维护 主-子关系
+					uainfo := models.Uafiliation{UserId: Cinfo[0].Id, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
+					ua := models.Newuafiliation().Iuainfo(uainfo)
+					if ua {
+						this.Data["json"] = types.Successre{Status: 200, Message: "子帐号新增成功", Code: 1}
+					} else {
+						this.Data["json"] = types.Successre{Status: 400, Message: "主子帐号维护失败，请联系管理员", Code: -1}
+					}
+
+				} else {
+					this.Data["json"] = types.Successre{Status: 400, Message: "新增失败，请联系管理员", Code: -1}
+				}
 			}
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "非主帐号不可以创建子帐号", Code: -1}
 		}
 
 	}
@@ -110,11 +113,21 @@ func (this *AccountController) Uaccount() {
 		_, result := models.Newaccount().IdGetInfo(info.Id)
 		if result {
 			//修改数据
-			errs := models.Newaccount().Uinfo(info)
+			errs, data := models.Newaccount().Uinfo(info)
 			if errs {
-				//维护关系表
+				//维护关系表 -- 整合数据
+				var ua models.Uafiliation
+				ua.UserMailbox = data.AccountMailbox
+				ua.UserName = data.AccountName
+				ua.UserPhone = data.AccountNum
+				ua.AccountId = data.Id
+				result := models.Newuafiliation().Uuainfo(ua)
 
-				this.Data["json"] = types.Successre{Status: 200, Message: "修改成功", Code: 1}
+				if result {
+					this.Data["json"] = types.Successre{Status: 200, Message: "修改成功", Code: 1}
+				} else {
+					this.Data["json"] = types.Successre{Status: 400, Message: "主子表维护失败，服务器内部错误", Code: -1}
+				}
 			} else {
 				this.Data["json"] = types.Successre{Status: 400, Message: "修改出错，服务器内部错误", Code: -1}
 			}
@@ -155,15 +168,21 @@ func (this *AccountController) Daccount() {
 		_, result := models.Newaccount().IdGetInfo(info.Id)
 		if result {
 			//修改数据
-			errs := models.Newaccount().Dinfo(info)
+			errs, infos := models.Newaccount().Dinfo(info)
 			if errs {
-				this.Data["json"] = types.Successre{Status: 200, Message: "修改成功", Code: 1}
+				result := models.Newuafiliation().Duainfo(infos.Id)
+				if result {
+					this.Data["json"] = types.Successre{Status: 200, Message: "删除出错成功", Code: 1}
+				} else {
+					this.Data["json"] = types.Successre{Status: 400, Message: "主子表维护失败，服务器内部错误", Code: -1}
+				}
+
 			} else {
-				this.Data["json"] = types.Successre{Status: 400, Message: "修改出错，服务器内部错误", Code: -1}
+				this.Data["json"] = types.Successre{Status: 400, Message: "删除出错，服务器内部错误", Code: -1}
 			}
 
 		} else {
-			this.Data["json"] = types.Successre{Status: 400, Message: "修改子账户不存在", Code: -1}
+			this.Data["json"] = types.Successre{Status: 400, Message: "删除出错子账户不存在", Code: -1}
 		}
 	}
 	this.ServeJSON()

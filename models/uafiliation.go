@@ -45,6 +45,26 @@ func (U *Uafiliation) Iuainfo(info Uafiliation) (res bool) {
 }
 
 //维护 主子帐号关系 -- 修改
-func (U *Uafiliation) Uuainfo() {
+func (U *Uafiliation) Uuainfo(ua Uafiliation) (res bool) {
 
+	sql := Db.Table("kg_uafiliation").Where("account_id = ? ", ua.AccountId).Update(&ua)
+
+	if sql.Error != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+//维护 主子帐号关系 -- 删除
+func (U *Uafiliation) Duainfo(ac_id int) (res bool) {
+
+	var ua Uafiliation
+	sql := Db.Table("kg_uafiliation").Where("account_id = ? ", ac_id).Delete(&ua)
+
+	if sql.Error != nil {
+		return false
+	} else {
+		return true
+	}
 }

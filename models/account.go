@@ -9,17 +9,17 @@ import (
 )
 
 type Account struct {
-	Id             int    `json:"id"`
-	AccountName    string `json:"account_name"`
-	AccountNum     string `json:"account_num"`
-	AccountPas     string `json:"account_pas"`
-	AccountMailbox string `json:"account_mailbox"`
-	AccountPhone   string `json:"account_phone"`
-	AccountStatus  string `json:"account_status"`
-	AccountRole    int    `json:"account_role"`
-	AccountCompany int    `json:"account_company"`
-	CreateTime     int64  `json:"create_time"`
-	UpdateTime     int64  `json:"update_time"`
+	Id             int     `json:"id"`
+	AccountName    string  `json:"account_name"`
+	AccountNum     string  `json:"account_num"`
+	AccountPas     string  `json:"account_pas"`
+	AccountMailbox string  `json:"account_mailbox"`
+	AccountPhone   string  `json:"account_phone"`
+	AccountStatus  string  `json:"account_status"`
+	AccountRole    float64 `json:"account_role"`
+	AccountCompany int     `json:"account_company"`
+	CreateTime     int64   `json:"create_time"`
+	UpdateTime     int64   `json:"update_time"`
 }
 
 func Newaccount() *Account {
@@ -42,7 +42,7 @@ func (A *Account) Iaccount(data map[string]interface{}) (res bool, id int) {
 		AccountMailbox: data["AccountMailbox"].(string),
 		AccountPhone:   data["AccountPhone"].(string),
 		AccountStatus:  "1", // 默认启动状态
-		AccountRole:    data["AccountRole"].(int),
+		AccountRole:    data["AccountRole"].(float64),
 		AccountCompany: data["AccountCompany"].(int),
 		CreateTime:     time.Now().Unix(),
 	}
@@ -98,27 +98,27 @@ func (A *Account) IdGetInfo(userid int) (info Account, res bool) {
 }
 
 //修改子账户
-func (A *Account) Uinfo(info Account) (res bool) {
+func (A *Account) Uinfo(info Account) (res bool, infos Account) {
 
 	//整合 修改数据
 	info.UpdateTime = time.Now().Unix()
 	err := Db.Table("kg_account").Where("id = ? ", info.Id).Update(info)
 
 	if err.Error != nil {
-		return false
+		return false, info
 	} else {
-		return true
+		return true, info
 	}
 }
 
 //删除子账户
-func (A *Account) Dinfo(info Account) (res bool) {
+func (A *Account) Dinfo(info Account) (res bool, infos Account) {
 
 	err := Db.Table("kg_account").Where("id = ? ", info.Id).Delete(&info)
 
 	if err.Error != nil {
-		return false
+		return false, infos
 	} else {
-		return true
+		return true, infos
 	}
 }
