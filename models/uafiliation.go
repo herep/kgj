@@ -32,7 +32,7 @@ func (U *Uafiliation) Suainfo(userPhone string, field string) (info []Uafiliatio
 	}
 }
 
-//维护 主子帐号 关系
+//维护 主子帐号 关系 -- 新增
 func (U *Uafiliation) Iuainfo(info Uafiliation) (res bool) {
 
 	sql := Db.Table("kg_uafiliation").Create(&info)
@@ -42,4 +42,9 @@ func (U *Uafiliation) Iuainfo(info Uafiliation) (res bool) {
 	} else {
 		return true
 	}
+}
+
+//维护 主子帐号关系 -- 修改
+func (U *Uafiliation) Uuainfo() {
+
 }

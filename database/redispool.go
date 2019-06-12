@@ -15,6 +15,7 @@ func init() {
 	//read conf
 	redis_host := beego.AppConfig.String("kg_redis_host")
 	redis_password := beego.AppConfig.String("kg_redis_password")
+
 	Pool = &redis.Pool{
 
 		MaxIdle:     3,

@@ -30,21 +30,23 @@ var FilterUser = func(ctx *context.Context) {
 
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 
-				data, _ := json.Marshal(types.Return{Status: 400, Message: "That's not even a token", Code: -1})
+				data, _ := json.Marshal(types.Return{Status: 400, Message: "That's not even a token", Code: -2})
 				ctx.ResponseWriter.Write(data)
 
 			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-				data, _ := json.Marshal(types.Return{Status: 400, Message: "Token is either expired or not active yet", Code: -1})
+				data, _ := json.Marshal(types.Return{Status: 400, Message: "Token is either expired or not active yet", Code: -2})
 				ctx.ResponseWriter.Write(data)
 
 			} else {
-				data, _ := json.Marshal(types.Return{Status: 400, Message: "Couldn't handle this token", Code: -1})
+				data, _ := json.Marshal(types.Return{Status: 400, Message: "Couldn't handle this token", Code: -2})
 				ctx.ResponseWriter.Write(data)
 			}
 		} else {
-			data, _ := json.Marshal(types.Return{Status: 400, Message: "Couldn't handle this token", Code: -1})
+			data, _ := json.Marshal(types.Return{Status: 400, Message: "Couldn't handle this token", Code: -2})
 			ctx.ResponseWriter.Write(data)
 		}
+	} else {
+
 	}
 
 }
@@ -64,13 +66,16 @@ func init() {
 
 	beego.Router("/v1/account/iaccount", &controllers.AccountController{}, "post:Iaccount")
 	beego.Router("/v1/account/uaccount", &controllers.AccountController{}, "post:Uaccount")
-	beego.Router("/v1/account/daccount", &controllers.AccountController{}, "post:Daccount")
+	beego.Router("/v1/account/daccount", &controllers.AccountController{}, "post:Uaccount")
 
 	beego.Router("/v1/jurisdiction/ijuinfo", &controllers.JurisdictionController{}, "post:Ijuinfo")
 	beego.Router("/v1/jurisdiction/ujuinfo", &controllers.JurisdictionController{}, "post:Ujurinfo")
 	beego.Router("/v1/jurisdiction/djuinfo", &controllers.JurisdictionController{}, "post:Djurinfo")
 	beego.Router("/v1/jurisdiction/julist", &controllers.JurisdictionController{}, "post:Julist")
 	beego.Router("/v1/jurisdiction/rolelist", &controllers.JurisdictionController{}, "post:Rolelist")
+	beego.Router("/v1/jurisdiction/roleinsert", &controllers.JurisdictionController{}, "post:RoleInsert")
+	beego.Router("/v1/jurisdiction/roleupdate", &controllers.JurisdictionController{}, "post:RoleUpdate")
+	beego.Router("/v1/jurisdiction/roledelect", &controllers.JurisdictionController{}, "post:RoleDelect")
 
 	beego.InsertFilter("/v1/*", beego.BeforeRouter, FilterUser)
 }

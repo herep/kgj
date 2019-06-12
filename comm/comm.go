@@ -33,11 +33,9 @@ func Post(apiURL string, params url.Values) (rs []byte, err error) {
 func Request(phone string, code string) (info []byte) {
 
 	//read -- conf
-	urls := beego.AppConfig.String("smsconf_url")
+	juheURL := beego.AppConfig.String("smsconf_url")
 	tpl_id := beego.AppConfig.String("smsconf_tpl_id")
 	key := beego.AppConfig.String("smsconf_key")
-	//请求地址
-	juheURL := urls
 
 	//初始化参数
 	param := url.Values{}

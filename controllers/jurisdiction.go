@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"finance/models"
 	"finance/types"
@@ -44,7 +45,7 @@ func (this *JurisdictionController) Ijuinfo() {
 	} else {
 
 		//入库信息整合
-		data.CreateTime = time.Now().Unix();
+		data.CreateTime = time.Now().Unix()
 		if data.PsPid == 0 {
 			data.PsLevel = 0
 		} else {
@@ -95,7 +96,7 @@ func (this *JurisdictionController) Ujurinfo() {
 
 		if resulte {
 			//入库信息整合
-			data.UpdateTime = time.Now().Unix();
+			data.UpdateTime = time.Now().Unix()
 			if data.PsPid == 0 {
 				data.PsLevel = 0
 			} else {
@@ -208,5 +209,132 @@ func (this *JurisdictionController) Rolelist() {
 		this.Data["json"] = types.Successre{Status: 400, Message: "ch", Code: -1}
 	}
 
+	this.ServeJSON()
+}
+
+//分配权限 -- 新增
+func (this *JurisdictionController) RoleInsert() {
+
+	//接受参数
+	var info map[string]interface{}
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+	if err != nil {
+		fmt.Println(nil)
+	}
+
+	//验证器
+	v := validation.Validation{}
+	v.Required(info["RoleName"], "role_name").Message("分组名称不可以为空！")
+	v.Required(info["RolePsIds"], "role_ps_ids").Message("分组权限不可以为空")
+
+	if v.HasErrors() {
+		var message string
+		for _, err := range v.Errors {
+			message = err.Message + ""
+		}
+		this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
+	} else {
+
+		//权限名称不可以 重复
+		roleinfo := models.Newrole().RoleRepeat(info["RoleName"].(string))
+		if roleinfo.RoleID == 0 {
+			//权限 分配 入库
+			res := models.Newrole().Roledistribution(info)
+			if res {
+				this.Data["json"] = types.Successre{Status: 200, Message: "权限分配成功", Code: 1}
+			} else {
+				this.Data["json"] = types.Successre{Status: 400, Message: "权限分配失败，请联系管理员", Code: -1}
+			}
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "权限分组已存在", Code: -1}
+		}
+	}
+	this.ServeJSON()
+}
+
+//分配权限 -- 修改
+func (this *JurisdictionController) RoleUpdate() {
+
+	// 接受修改参数
+	var info map[string]interface{}
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//验证器
+	v := validation.Validation{}
+	v.Required(info["RoleID"], "role_id").Message("请选择需要修改分组！")
+	v.Required(info["RoleName"], "role_id").Message("请谨慎，权限分组名可能会清空！")
+	v.Required(info["RolePsIds"], "role_ps_ids").Message("请谨慎，权限可能会清空！")
+
+	//错误信息整合
+	if v.HasErrors() {
+		//获取提示错误信息
+		var buff bytes.Buffer
+		for _, err := range v.Errors {
+			buff.WriteString(err.Message)
+			buff.WriteString(" ")
+		}
+		message := buff.String()
+		this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
+	} else {
+
+		//空信息 判断
+		resinfo := models.Newrole().RoleidRepeat(info["RoleID"].(float64))
+		if resinfo.RoleID != 0 {
+			//进行修改操作
+			reslute := models.Newrole().RoleUp(info)
+			if reslute {
+				this.Data["json"] = types.Successre{Status: 200, Message: "分组修改成功", Code: 1}
+			} else {
+				this.Data["json"] = types.Successre{Status: 400, Message: "修改失败，联系管理员", Code: -1}
+			}
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "修改权限分组不存在", Code: -1}
+		}
+	}
+
+	this.ServeJSON()
+}
+
+//分配权限 -- 删除
+func (this *JurisdictionController) RoleDelect() {
+
+	// 接受修改参数
+	var info map[string]interface{}
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//验证器
+	v := validation.Validation{}
+	v.Required(info["RoleID"], "role_id").Message("请选择需要删除分组！")
+
+	if v.HasErrors() {
+		var buff bytes.Buffer
+		for _, err := range v.Errors {
+			buff.WriteString(err.Message)
+			buff.WriteString(" ")
+		}
+		message := buff.String()
+		this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
+	} else {
+
+		// 删除权限分组 存在
+		res := models.Newrole().RoleidRepeat(info["RoleID"].(float64))
+		if res.RoleID != 0 {
+			result := models.Newrole().RoleDe(info["RoleID"].(float64))
+			if result {
+
+				this.Data["json"] = types.Successre{Status: 200, Message: "权限分组删除成功", Code: 1}
+			} else {
+				this.Data["json"] = types.Successre{Status: 400, Message: "权限删除失败，请联系管理员", Code: -1}
+			}
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "权限分组不存在", Code: -1}
+		}
+	}
 	this.ServeJSON()
 }

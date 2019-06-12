@@ -112,6 +112,8 @@ func (this *AccountController) Uaccount() {
 			//修改数据
 			errs := models.Newaccount().Uinfo(info)
 			if errs {
+				//维护关系表
+
 				this.Data["json"] = types.Successre{Status: 200, Message: "修改成功", Code: 1}
 			} else {
 				this.Data["json"] = types.Successre{Status: 400, Message: "修改出错，服务器内部错误", Code: -1}
