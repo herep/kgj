@@ -49,8 +49,8 @@ func (this *AccountController) Iaccount() {
 
 		//此时登录 主帐号
 		Cinfo := comm.GetTokeninfo(this.Ctx)
-		if len(Cinfo) != 0 {
-			info["AccountCompany"] = Cinfo[0].Id
+		if Cinfo.AccountId != 0 {
+			info["AccountCompany"] = Cinfo.AccountId
 			//相同电话不可以重复注册
 			res, _ := models.Newaccount().Saccount(info["AccountNum"].(string))
 
@@ -63,7 +63,7 @@ func (this *AccountController) Iaccount() {
 
 				if ac {
 					//维护 主-子关系
-					uainfo := models.Uafiliation{UserId: Cinfo[0].Id, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
+					uainfo := models.Uafiliation{UserId: Cinfo.AccountId, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
 					ua := models.Newuafiliation().Iuainfo(uainfo)
 					if ua {
 						this.Data["json"] = types.Successre{Status: 200, Message: "子帐号新增成功", Code: 1}

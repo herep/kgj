@@ -47,8 +47,9 @@ var FilterUser = func(ctx *context.Context) {
 		}
 	} else {
 
-	}
+		//权限
 
+	}
 }
 
 func init() {

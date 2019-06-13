@@ -150,3 +150,22 @@ func (U *KgUser) IdGetInfo(userid float64) []KgUser {
 	}
 	return userinfo
 }
+
+func (U *KgUser) IdGetIntInfo(userid int) []KgUser {
+	//存储信息
+	var userinfo []KgUser
+
+	//查询
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("kg_user").
+		Where("id = ?")
+	sql := qb.String()
+
+	//执行
+	o := orm.NewOrm()
+	if _, err := o.Raw(sql, userid).QueryRows(&userinfo); err != nil {
+		fmt.Println(err)
+	}
+	return userinfo
+}

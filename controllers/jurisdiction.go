@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"finance/comm"
 	"finance/models"
 	"finance/types"
 	"fmt"
@@ -202,13 +203,18 @@ func (this *JurisdictionController) Julist() {
 //分配权限 列表
 func (this *JurisdictionController) Rolelist() {
 
-	info, res := models.Newrole().RoleLsit()
-	if res {
-		this.Data["json"] = types.SuccessreInfo{Status: 200, Message: "返回成功", Data: info, Code: 1}
-	} else {
-		this.Data["json"] = types.Successre{Status: 400, Message: "ch", Code: -1}
-	}
+	userinfo := comm.GetTokeninfo(this.Ctx)
 
+	if userinfo.AccountId != 0 {
+		this.Data["json"] = types.Successre{Status: 400, Message: "子帐号不可以查看权限列表", Code: -1}
+	} else {
+		info, res := models.Newrole().RoleLsit(userinfo.UserId)
+		if res {
+			this.Data["json"] = types.SuccessreInfo{Status: 200, Message: "返回成功", Data: info, Code: 1}
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "ch", Code: -1}
+		}
+	}
 	this.ServeJSON()
 }
 
@@ -239,12 +245,21 @@ func (this *JurisdictionController) RoleInsert() {
 		roleinfo := models.Newrole().RoleRepeat(info["RoleName"].(string))
 		if roleinfo.RoleID == 0 {
 			//权限 分配 入库
-			res := models.Newrole().Roledistribution(info)
-			if res {
-				this.Data["json"] = types.Successre{Status: 200, Message: "权限分配成功", Code: 1}
+			userinfo := comm.GetTokeninfo(this.Ctx)
+
+			// 非主帐号 不可以 添加
+			if userinfo.AccountId != 0 {
+				this.Data["json"] = types.Successre{Status: 400, Message: "非主帐号不可以权限分配", Code: -1}
 			} else {
-				this.Data["json"] = types.Successre{Status: 400, Message: "权限分配失败，请联系管理员", Code: -1}
+				info["CompanyId"] = userinfo.UserId
+				res := models.Newrole().Roledistribution(info)
+				if res {
+					this.Data["json"] = types.Successre{Status: 200, Message: "权限分配成功", Code: 1}
+				} else {
+					this.Data["json"] = types.Successre{Status: 400, Message: "权限分配失败，请联系管理员", Code: -1}
+				}
 			}
+
 		} else {
 			this.Data["json"] = types.Successre{Status: 400, Message: "权限分组已存在", Code: -1}
 		}

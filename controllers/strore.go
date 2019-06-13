@@ -41,10 +41,10 @@ func (this *StroreController) Ishopname() {
 
 		//token值
 		userinfo := comm.GetTokeninfo(this.Ctx)
-		info := map[string]interface{}{"shopanme": shopname, "create_time": time.Now().Unix(), "company_id": userinfo[0].Id}
+		info := map[string]interface{}{"shopanme": shopname, "create_time": time.Now().Unix(), "company_id": userinfo.UserId}
 
 		//判断是否 重复 入库
-		repeat := models.NewShoplist().Chackshop(shopname, userinfo[0].Id)
+		repeat := models.NewShoplist().Chackshop(shopname, userinfo.UserId)
 		if len(repeat) == 0 {
 			//入库操作
 			res := models.NewShoplist().Sinsert(info)
@@ -70,7 +70,7 @@ func (this *StroreController) Shoplist() {
 	var where *types.WshopList
 	//当前用户 -- 个人信息
 	userinfo := comm.GetTokeninfo(this.Ctx)
-	company_id := userinfo[0].Id
+	company_id := userinfo.UserId
 
 	//按照条件 查询
 	if err := json.Unmarshal(this.Ctx.Input.RequestBody, &where); err != nil {
@@ -97,12 +97,12 @@ func (this *StroreController) Shoplist() {
 
 		//数据库数据 返回
 		info, count := models.NewShoplist().Sshoplist(where)
-
+		companyinfos := models.NewUser().IdGetIntInfo(company_id)
 
 		if count == 0 {
 			this.Data["json"] = types.Successre{Status: 400, Message: "暂无数据", Code: -1}
 		} else {
-			this.Data["json"] = map[string]interface{}{"Status": 200, "Message": "返回成功", "Data": info, "Count": count, "Code": 1, "CompanyName": userinfo[0].CompanyName}
+			this.Data["json"] = map[string]interface{}{"Status": 200, "Message": "返回成功", "Data": info, "Count": count, "Code": 1, "CompanyName": companyinfos[0].CompanyName}
 		}
 	}
 

@@ -59,7 +59,7 @@ func Request(phone string, code string) (info []byte) {
 }
 
 //token---获取个人信息
-func GetTokeninfo(ctx *context.Context) (message []models.KgUser) {
+func GetTokeninfo(ctx *context.Context) (message models.Uafiliation) {
 
 	authString := ctx.Input.Header("Token")
 	kv := strings.Split(authString, " ")
@@ -72,8 +72,31 @@ func GetTokeninfo(ctx *context.Context) (message []models.KgUser) {
 
 	//获取 请求头中 信息 -- 查询个人信息
 	tokeninfo, _ := token.Claims.(jwt.MapClaims)
-	userid := tokeninfo["userid"].(float64)
-	Newinfo := models.NewUser().IdGetInfo(userid)
 
-	return Newinfo
+	//判断 主子帐号登录
+	if tokeninfo["belong"] == "BOSS" {
+		userid := tokeninfo["userid"].(float64)
+		Newinfo := models.NewUser().IdGetInfo(userid)
+
+		//整合 返回信息
+		message.UserId = Newinfo[0].Id
+		message.AccountId = 0
+		message.UserMailbox = Newinfo[0].Mailbox
+		message.UserName = Newinfo[0].AdminName
+		message.UserPhone = Newinfo[0].AdminNum
+
+	} else {
+		userid := tokeninfo["userid"].(int)
+		Newinfo, _ := models.Newaccount().IdGetInfo(userid)
+
+		//整合 返回信息
+		message.UserId = Newinfo.AccountCompany
+		message.AccountId = Newinfo.Id
+		message.UserMailbox = Newinfo.AccountMailbox
+		message.UserName = Newinfo.AccountName
+		message.UserPhone = Newinfo.AccountPhone
+	}
+
+	return
+
 }

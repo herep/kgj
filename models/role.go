@@ -14,6 +14,7 @@ type Role struct {
 	RoleName   string `json:"role_name"`
 	RolePsIds  string `json:"role_ps_ids"`
 	RolePsCa   string `json:"role_ps_ca"`
+	CompanyId  int    `json:"company_id"`
 	CreateTime int64  `json:"create_time"`
 	UpdateTime int64  `json:"update_time"`
 	DeleteTime int64  `json:"delete_time"`
@@ -24,12 +25,15 @@ func Newrole() *Role {
 }
 
 //role -- permission
-func (R *Role) RoleLsit() (item map[int]map[string][]interface{}, res bool) {
+func (R *Role) RoleLsit(company_id int) (item map[int]map[string][]interface{}, res bool) {
 
 	var roles []types.Roles
 	//role -- permission 内容
-	Db.Table("kg_role").Select("kg_role.role_id,kg_role.role_name,group_concat(kg_permission.ps_name ORDER BY kg_permission.ps_id DESC) as role_names").
-		Joins("join kg_permission on FIND_IN_SET(kg_permission.ps_id,kg_role.role_ps_ids)").Group("kg_role.role_name").
+	Db.Table("kg_role").
+		Select("kg_role.role_id,kg_role.role_name,group_concat(kg_permission.ps_name ORDER BY kg_permission.ps_id DESC) as role_names").
+		Joins("join kg_permission on FIND_IN_SET(kg_permission.ps_id,kg_role.role_ps_ids)").
+		Group("kg_role.role_name").
+		Where("kg_role.company_id = ?", company_id).
 		Find(&roles)
 
 	if len(roles) != 0 {
