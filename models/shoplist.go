@@ -107,7 +107,7 @@ func (S *KgShoplist) Sauthorize(info types.Pcallback) (message string, result bo
 
 	} else {
 		fmt.Println(err)
-		message := "授权店铺旺旺号与填写店铺名不一致，请重新填写" 
+		message := "授权店铺旺旺号与填写店铺名不一致，请重新填写"
 		return message, false
 	}
 
@@ -118,25 +118,26 @@ func (S *KgShoplist) Sshoplist(where *types.WshopList) (data []KgShoplist, count
 
 	//查询 -- 存储数据
 	var info []KgShoplist
+	sql := Db
 
-	sql := Db.Table("kg_shoplist").Where("company_id = ?", where.CompanyId).
+	sql = sql.Table("kg_shoplist").Where("company_id = ?", where.CompanyId).
 		Where("status = ?", where.Status).
 		Where("restatus = ?", where.Restatus)
 
 	// 状态查询
 	if where.SiteName != "" {
-		sql.Where("site_name = ?", where.SiteName) // 站点查询
+		sql = sql.Where("site_name = ?", where.SiteName) // 站点查询
 	}
 
 	if where.Strattime != "" {
-		sql.Where("create_time >= ?", where.Strattime) // 创建时间
+		sql = sql.Where("create_time >= ?", where.Strattime) // 创建时间
 	}
 	if where.Endtime != "" {
-		sql.Where("create_time <= ?", where.Endtime) // 创建时间
+		sql = sql.Where("create_time <= ?", where.Endtime) // 创建时间
 	}
 
 	if where.TaobaoUserNick != "" {
-		sql.Where("taobao_user_nick = ?", where.TaobaoUserNick) // 店铺名
+		sql = sql.Where("taobao_user_nick = ?", where.TaobaoUserNick) // 店铺名
 	}
 
 	sql.Count(&count)

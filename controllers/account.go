@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"finance/comm"
 	"finance/models"
@@ -12,6 +13,41 @@ import (
 
 type AccountController struct {
 	beego.Controller
+}
+
+//子帐号 -- 列表
+func (this *AccountController) Accountlist() {
+
+	// 获取筛选条件
+	var whereinfo map[string]interface{}
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &whereinfo)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	v := validation.Validation{}
+	v.Required(whereinfo["Page"], "page").Message("页码不可以为空！")
+	v.Required(whereinfo["PageSize"], "pagesize").Message("页数量不可以为空！")
+
+	if v.HasErrors() {
+		var buff bytes.Buffer
+		for _, err := range v.Errors {
+			buff.WriteString(err.Message)
+			buff.WriteString(" ")
+		}
+		message := buff.String()
+		this.Data["json"] = types.Successre{Status: 400, Message: message, Code: -1}
+	} else {
+
+		count, data := models.Newaccount().Wlist(whereinfo)
+		if count != 0 {
+			this.Data["json"] = map[string]interface{}{"Status": 200, "Message": "列表内容", "Data": data, "Count": count, "Code": 1}
+		} else {
+			this.Data["json"] = types.Successre{Status: 400, Message: "暂时没有数据", Code: -1}
+		}
+	}
+	this.ServeJSON()
 }
 
 //子帐号 -- 新增
@@ -49,21 +85,28 @@ func (this *AccountController) Iaccount() {
 
 		//此时登录 主帐号
 		Cinfo := comm.GetTokeninfo(this.Ctx)
-		if Cinfo.AccountId != 0 {
-			info["AccountCompany"] = Cinfo.AccountId
-			//相同电话不可以重复注册
-			res, _ := models.Newaccount().Saccount(info["AccountNum"].(string))
 
-			if res {
+		if Cinfo.AccountId == 0 {
+			info["AccountCompany"] = Cinfo.UserId
+			//相同 电话 -- 用户名 -- 邮箱不可以重复注册
+			resnum, _ := models.Newaccount().Saccount(info["AccountNum"].(string), 1)
+			resname, _ := models.Newaccount().Saccount(info["AccountName"].(string), 2)
+			resmailbox, _ := models.Newaccount().Saccount(info["AccountMailbox"].(string), 3)
+
+			if resnum {
 				//不允许 新增
 				this.Data["json"] = types.Successre{Status: 400, Message: "电话已绑定帐号", Code: -1}
+			} else if resname {
+				this.Data["json"] = types.Successre{Status: 400, Message: "用户名已存在", Code: -1}
+			} else if resmailbox {
+				this.Data["json"] = types.Successre{Status: 400, Message: "邮箱已绑定帐号", Code: -1}
 			} else {
 
 				ac, acid := models.Newaccount().Iaccount(info) //新增子帐号主键
 
 				if ac {
 					//维护 主-子关系
-					uainfo := models.Uafiliation{UserId: Cinfo.AccountId, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
+					uainfo := models.Uafiliation{UserId: Cinfo.UserId, AccountId: acid, UserName: info["AccountName"].(string), UserMailbox: info["AccountMailbox"].(string), UserPhone: info["AccountNum"].(string), Status: 1}
 					ua := models.Newuafiliation().Iuainfo(uainfo)
 					if ua {
 						this.Data["json"] = types.Successre{Status: 200, Message: "子帐号新增成功", Code: 1}
@@ -165,14 +208,15 @@ func (this *AccountController) Daccount() {
 	} else {
 
 		//是否存在 信息
-		_, result := models.Newaccount().IdGetInfo(info.Id)
+		infos, result := models.Newaccount().IdGetInfo(info.Id)
+
 		if result {
-			//修改数据
-			errs, infos := models.Newaccount().Dinfo(info)
+			//shanhu数据
+			errs, _ := models.Newaccount().Dinfo(info)
 			if errs {
 				result := models.Newuafiliation().Duainfo(infos.Id)
 				if result {
-					this.Data["json"] = types.Successre{Status: 200, Message: "删除出错成功", Code: 1}
+					this.Data["json"] = types.Successre{Status: 200, Message: "删除成功", Code: 1}
 				} else {
 					this.Data["json"] = types.Successre{Status: 400, Message: "主子表维护失败，服务器内部错误", Code: -1}
 				}

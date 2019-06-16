@@ -77,7 +77,6 @@ func GetTokeninfo(ctx *context.Context) (message models.Uafiliation) {
 	if tokeninfo["belong"] == "BOSS" {
 		userid := tokeninfo["userid"].(float64)
 		Newinfo := models.NewUser().IdGetInfo(userid)
-
 		//整合 返回信息
 		message.UserId = Newinfo[0].Id
 		message.AccountId = 0
@@ -88,7 +87,6 @@ func GetTokeninfo(ctx *context.Context) (message models.Uafiliation) {
 	} else {
 		userid := tokeninfo["userid"].(int)
 		Newinfo, _ := models.Newaccount().IdGetInfo(userid)
-
 		//整合 返回信息
 		message.UserId = Newinfo.AccountCompany
 		message.AccountId = Newinfo.Id

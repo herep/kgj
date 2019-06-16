@@ -67,7 +67,8 @@ func init() {
 
 	beego.Router("/v1/account/iaccount", &controllers.AccountController{}, "post:Iaccount")
 	beego.Router("/v1/account/uaccount", &controllers.AccountController{}, "post:Uaccount")
-	beego.Router("/v1/account/daccount", &controllers.AccountController{}, "post:Uaccount")
+	beego.Router("/v1/account/daccount", &controllers.AccountController{}, "post:Daccount")
+	beego.Router("/v1/account/accountlist", &controllers.AccountController{}, "post:Accountlist")
 
 	beego.Router("/v1/jurisdiction/ijuinfo", &controllers.JurisdictionController{}, "post:Ijuinfo")
 	beego.Router("/v1/jurisdiction/ujuinfo", &controllers.JurisdictionController{}, "post:Ujurinfo")

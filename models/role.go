@@ -25,7 +25,7 @@ func Newrole() *Role {
 }
 
 //role -- permission
-func (R *Role) RoleLsit(company_id int) (item map[int]map[string][]interface{}, res bool) {
+func (R *Role) RoleLsit(company_id int) (item map[int]map[string]interface{}, res bool) {
 
 	var roles []types.Roles
 	//role -- permission 内容
@@ -37,24 +37,24 @@ func (R *Role) RoleLsit(company_id int) (item map[int]map[string][]interface{}, 
 		Find(&roles)
 
 	if len(roles) != 0 {
-		item = make(map[int]map[string][]interface{})
+		item = make(map[int]map[string]interface{})
 		//整合数据
 		for k, v := range roles {
 			//多个权限
 			res := strings.Contains(v.RoleNames, ",")
 			if res {
-				items := make(map[string][]interface{})
+				items := make(map[string]interface{})
 				arr := strings.Split(v.RoleNames, ",")
-				items["son"] = append(items["son"], arr)
-				items["name"] = append(items["name"], v.RoleName)
-				items["role_id"] = append(items["role_id"], v.RoleId)
+				items["son"] = arr
+				items["name"] = v.RoleName
+				items["role_id"] = v.RoleId
 				item[k] = items
 
 			} else {
-				items := make(map[string][]interface{})
-				items["son"] = append(items["son"], v.RoleNames)
-				items["name"] = append(items["name"], v.RoleName)
-				items["role_id"] = append(items["role_id"], v.RoleId)
+				items := make(map[string]interface{})
+				items["son"] = v.RoleNames
+				items["name"] = v.RoleName
+				items["role_id"] = v.RoleId
 				item[k] = items
 			}
 		}
