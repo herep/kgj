@@ -71,7 +71,6 @@ var FilterUser = func(ctx *context.Context) {
 					s := strings.Split(v.RolePsCas, ",")
 					for _, v2 := range s {
 						if v2 == urlrole {
-
 							ints = ints + 1
 						}
 					}
@@ -83,7 +82,7 @@ var FilterUser = func(ctx *context.Context) {
 			}
 
 			if ints == 0 {
-				data, _ := json.Marshal(types.Successre{Status: 400, Message: "无权限，禁止访问！", Code: -2})
+				data, _ := json.Marshal(types.Successre{Status: 400, Message: "无权限，禁止访问！", Code: -1})
 				ctx.ResponseWriter.Write(data)
 			}
 		}
