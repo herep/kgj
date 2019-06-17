@@ -85,7 +85,7 @@ func GetTokeninfo(ctx *context.Context) (message models.Uafiliation) {
 		message.UserPhone = Newinfo[0].AdminNum
 
 	} else {
-		userid := tokeninfo["userid"].(int)
+		userid := tokeninfo["userid"].(float64)
 		Newinfo, _ := models.Newaccount().IdGetInfo(userid)
 		//整合 返回信息
 		message.UserId = Newinfo.AccountCompany

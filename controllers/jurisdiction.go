@@ -47,8 +47,9 @@ func (this *JurisdictionController) Ijuinfo() {
 
 		//入库信息整合
 		data.CreateTime = time.Now().Unix()
-		if data.PsPid == 0 {
+		if data.PsPid == -1 {
 			data.PsLevel = 0
+			data.PsPid = 0
 		} else {
 			//查询父级等级 新增等级 父级+1
 			info, res := models.NewPermission().Sfpslevel(data.PsPid)
@@ -98,8 +99,9 @@ func (this *JurisdictionController) Ujurinfo() {
 		if resulte {
 			//入库信息整合
 			data.UpdateTime = time.Now().Unix()
-			if data.PsPid == 0 {
+			if data.PsPid == -1 {
 				data.PsLevel = 0
+				data.PsPid = 0
 			} else {
 				//查询父级等级 新增等级 父级+1
 				info, res := models.NewPermission().Sfpslevel(data.PsPid)
@@ -203,12 +205,17 @@ func (this *JurisdictionController) Julist() {
 //分配权限 列表
 func (this *JurisdictionController) Rolelist() {
 
-	userinfo := comm.GetTokeninfo(this.Ctx)
+	var whereinsert models.Role
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &whereinsert)
+	if err != nil {
+		fmt.Println(err)
+	}
 
+	userinfo := comm.GetTokeninfo(this.Ctx)
 	if userinfo.AccountId != 0 {
 		this.Data["json"] = types.Successre{Status: 400, Message: "子帐号不可以查看权限列表", Code: -1}
 	} else {
-		info, res := models.Newrole().RoleLsit(userinfo.UserId)
+		info, res := models.Newrole().RoleLsit(userinfo.UserId, whereinsert)
 		if res {
 			this.Data["json"] = types.SuccessreInfo{Status: 200, Message: "返回成功", Data: info, Code: 1}
 		} else {
@@ -225,7 +232,7 @@ func (this *JurisdictionController) RoleInsert() {
 	var info map[string]interface{}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
 	if err != nil {
-		fmt.Println(nil)
+		fmt.Println(err)
 	}
 
 	//验证器

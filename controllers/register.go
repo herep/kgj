@@ -23,7 +23,10 @@ func (this *RegisterController) SendCode() {
 	//接受数据
 	res := make(map[string]interface{})
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &res)
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	phone := res["phone"].(string)
 
 	//验证器
@@ -115,7 +118,9 @@ func (this *RegisterController) Register() {
 		//整合参数
 		res := make(map[string]interface{})
 		err := json.Unmarshal(this.Ctx.Input.RequestBody, &res)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
 
 		company_name := res["company_name"].(string)
 		admin_num := res["admin_num"].(string)
@@ -123,7 +128,7 @@ func (this *RegisterController) Register() {
 		admin_name := res["admin_name"].(string)
 		phone_num := res["phone_num"].(string)
 		mailbox := res["mailbox"].(string)
-		consent := res["consent"].(string)
+		consent := res["consent"].(float64)
 		code := res["code"].(string)
 
 		//验证器
@@ -183,12 +188,11 @@ func (this *RegisterController) Register() {
 										"create_time":  ntime,
 										"consent":      consent,
 									}
-
 									res, id := models.NewUser().Insertv(info)
 
 									if res {
 										//维护 关系 表
-										uainfo := models.Uafiliation{UserId: id, AccountId: 0, UserName: info["admin_name"].(string), UserMailbox: info["mailbox"].(string), UserPhone: info["admin_num"].(string), Status: 1}
+										uainfo := models.Uafiliation{UserId: id, AccountId: 0, UserName: info["admin_name"].(string), UserMailbox: info["mailbox"].(string), UserPhone: info["admin_num"].(string), Status: 0}
 										ua := models.Newuafiliation().Iuainfo(uainfo)
 										if ua {
 											this.Data["json"] = types.Successre{Status: 200, Message: "注册成功", Code: 0}
@@ -262,7 +266,6 @@ func (this *RegisterController) Login() {
 		uainfo, err := models.Newuafiliation().Suainfo(ob.AdminNum, field)
 		pas := md5.Sum([]byte(ob.Password))
 		md5str := fmt.Sprintf("%x", pas)
-
 		if err {
 			if uainfo[0].Status != 0 {
 

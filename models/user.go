@@ -7,16 +7,16 @@ import (
 )
 
 type KgUser struct {
-	Id          int    `json:"id"`
-	CompanyName string `json:"company_name"`
-	AdminNum    string `json:"admin_num"`
-	Password    string `json:"password"`
-	AdminName   string `json:"admin_name"`
-	PhoneNum    string `json:"phone_num"`
-	Mailbox     string `json:"mailbox"`
-	CreateTime  int64  `json:"create_time"`
-	UpdateTime  string `json:"update_time"`
-	Consent     int    `json:"consent"`
+	Id          int     `json:"id"`
+	CompanyName string  `json:"company_name"`
+	AdminNum    string  `json:"admin_num"`
+	Password    string  `json:"password"`
+	AdminName   string  `json:"admin_name"`
+	PhoneNum    string  `json:"phone_num"`
+	Mailbox     string  `json:"mailbox"`
+	CreateTime  int64   `json:"create_time"`
+	UpdateTime  string  `json:"update_time"`
+	Consent     float64 `json:"consent"`
 }
 
 func NewUser() *KgUser {
@@ -35,9 +35,9 @@ func (U *KgUser) Insertv(info map[string]interface{}) (res bool, id int) {
 	insert.PhoneNum = info["phone_num"].(string)
 	insert.Mailbox = info["mailbox"].(string)
 	insert.CreateTime = info["create_time"].(int64)
-	insert.Consent = info["consent"].(int)
+	insert.Consent = info["consent"].(float64)
 
-	err := Db.Table("kg_account").Create(&insert)
+	err := Db.Table("kg_user").Create(&insert)
 
 	if err.Error != nil {
 		return false, 0
@@ -77,7 +77,7 @@ func (U *KgUser) Checkmailboxuser(mailbox string) []KgUser {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("*").
 		From("kg_user").
-		Where("account_mailbox = ?")
+		Where("mailbox = ?")
 
 	sql := qb.String()
 
@@ -98,7 +98,7 @@ func (U *KgUser) Checknameuser(name string) []KgUser {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("*").
 		From("kg_user").
-		Where("account_name = ?")
+		Where("admin_name = ?")
 
 	sql := qb.String()
 

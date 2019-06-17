@@ -7,7 +7,7 @@ import (
 type Permission struct {
 	PsID       int    `json:"ps_id"`
 	PsName     string `json:"ps_name"`
-	PsPid      int `json:"ps_pid"`
+	PsPid      int    `json:"ps_pid"`
 	PsC        string `json:"ps_c"`
 	PsA        string `json:"ps_a"`
 	PsLevel    int64  `json:"ps_level"`
@@ -16,7 +16,6 @@ type Permission struct {
 	DeleteTime int64  `json:"delete_time"`
 }
 
-
 func NewPermission() *Permission {
 	return &Permission{}
 }
@@ -24,7 +23,7 @@ func NewPermission() *Permission {
 //查询 父级权限等级
 func (P *Permission) Sfpslevel(pslevel int) (level Permission, res bool) {
 
-	Db.Table("kg_permission").Select("ps_level").Where("ps_level = ?", pslevel).Find(&level)
+	Db.Table("kg_permission").Where("ps_id = ?", pslevel).Find(&level)
 
 	if level.PsID != 0 {
 		return level, true

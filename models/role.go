@@ -25,16 +25,21 @@ func Newrole() *Role {
 }
 
 //role -- permission
-func (R *Role) RoleLsit(company_id int) (item map[int]map[string]interface{}, res bool) {
+func (R *Role) RoleLsit(company_id int, whereinsert Role) (item map[int]map[string]interface{}, res bool) {
 
 	var roles []types.Roles
 	//role -- permission 内容
-	Db.Table("kg_role").
+
+	sql := Db.Table("kg_role").
 		Select("kg_role.role_id,kg_role.role_name,group_concat(kg_permission.ps_name ORDER BY kg_permission.ps_id DESC) as role_names").
 		Joins("join kg_permission on FIND_IN_SET(kg_permission.ps_id,kg_role.role_ps_ids)").
 		Group("kg_role.role_name").
-		Where("kg_role.company_id = ?", company_id).
-		Find(&roles)
+		Where("kg_role.company_id = ?", company_id)
+
+	if whereinsert.RoleID != 0 {
+		sql = sql.Where("kg_role.role_id = ?", whereinsert.RoleID)
+	}
+	sql.Find(&roles)
 
 	if len(roles) != 0 {
 		item = make(map[int]map[string]interface{})
@@ -85,6 +90,7 @@ func (R *Role) Roledistribution(item map[string]interface{}) (res bool) {
 	i := len([]rune(s)) //字符串长度
 	items.RolePsCa = string([]rune(s)[:i-1])
 	items.CreateTime = time.Now().Unix()
+	items.CompanyId = item["CompanyId"].(int)
 
 	sql := Db.Table("kg_role").Create(&items)
 	if sql.Error != nil {
@@ -131,6 +137,7 @@ func (R *Role) RoleUp(Uinfo map[string]interface{}) (res bool) {
 	i := len([]rune(s)) //字符串长度
 	item.RolePsCa = string([]rune(s)[:i-1])
 	item.UpdateTime = time.Now().Unix()
+	item.RoleName = Uinfo["RoleName"].(string)
 
 	//sql 修改
 	err := Db.Table("kg_role").Where("role_id = ?", Uinfo["RoleID"]).Update(item)

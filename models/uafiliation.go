@@ -2,17 +2,18 @@ package models
 
 import (
 	. "finance/database"
+	"finance/types"
 	"fmt"
 )
 
 type Uafiliation struct {
-	Id          int    `json:"id"`
-	UserId      int    `json:"user_id"`
-	AccountId   int    `json:"account_id"`
-	UserName    string `json:"user_name"`
-	UserMailbox string `json:"user_mailbox"`
-	UserPhone   string `json:"user_phone"`
-	Status      int    `json:"status"`
+	Id          int     `json:"id"`
+	UserId      int     `json:"user_id"`
+	AccountId   float64 `json:"account_id"`
+	UserName    string  `json:"user_name"`
+	UserMailbox string  `json:"user_mailbox"`
+	UserPhone   string  `json:"user_phone"`
+	Status      int     `json:"status"`
 }
 
 func Newuafiliation() *Uafiliation {
@@ -57,7 +58,7 @@ func (U *Uafiliation) Uuainfo(ua Uafiliation) (res bool) {
 }
 
 //维护 主子帐号关系 -- 删除
-func (U *Uafiliation) Duainfo(ac_id int) (res bool) {
+func (U *Uafiliation) Duainfo(ac_id float64) (res bool) {
 
 	var ua Uafiliation
 	sql := Db.Table("kg_uafiliation").Where("account_id = ? ", ac_id).Delete(&ua)
@@ -67,4 +68,16 @@ func (U *Uafiliation) Duainfo(ac_id int) (res bool) {
 	} else {
 		return true
 	}
+}
+
+//查询 权限
+func (U *Uafiliation) SelectRoleinfo(info Uafiliation) (roles []types.RolePsCa) {
+
+	Db.Table("kg_account").
+		Select("kg_role.role_ps_ca as role_ps_cas ").
+		Joins("join kg_role on FIND_IN_SET(kg_role.role_id,kg_account.account_role)").
+		Where("kg_account.account_company = ?", info.UserId).
+		Find(&roles)
+
+	return
 }

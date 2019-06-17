@@ -12,17 +12,17 @@ import (
 )
 
 type Account struct {
-	Id             int    `json:"id"`
-	AccountName    string `json:"account_name"`
-	AccountNum     string `json:"account_num"`
-	AccountPas     string `json:"account_pas"`
-	AccountMailbox string `json:"account_mailbox"`
-	AccountPhone   string `json:"account_phone"`
-	AccountStatus  string `json:"account_status"`
-	AccountRole    string `json:"account_role"`
-	AccountCompany int    `json:"account_company"`
-	CreateTime     int64  `json:"create_time"`
-	UpdateTime     int64  `json:"update_time"`
+	Id             float64 `json:"id"`
+	AccountName    string  `json:"account_name"`
+	AccountNum     string  `json:"account_num"`
+	AccountPas     string  `json:"account_pas"`
+	AccountMailbox string  `json:"account_mailbox"`
+	AccountPhone   string  `json:"account_phone"`
+	AccountStatus  string  `json:"account_status"`
+	AccountRole    string  `json:"account_role"`
+	AccountCompany int     `json:"account_company"`
+	CreateTime     int64   `json:"create_time"`
+	UpdateTime     int64   `json:"update_time"`
 }
 
 func Newaccount() *Account {
@@ -30,7 +30,7 @@ func Newaccount() *Account {
 }
 
 //子帐号 入库
-func (A *Account) Iaccount(data map[string]interface{}) (res bool, id int) {
+func (A *Account) Iaccount(data map[string]interface{}) (res bool, id float64) {
 
 	// md5 加密
 	w := md5.New()
@@ -86,7 +86,6 @@ func (A *Account) Checkacinfo(ac_name string, field string) (data Account, res b
 	err := Db.Table("kg_account").Where(field+"= ?", ac_name).Find(&data)
 
 	if data.Id != 0 {
-
 		return data, true
 	} else {
 		fmt.Println(err)
@@ -95,7 +94,7 @@ func (A *Account) Checkacinfo(ac_name string, field string) (data Account, res b
 }
 
 //查询子帐号
-func (A *Account) IdGetInfo(userid int) (info Account, res bool) {
+func (A *Account) IdGetInfo(userid float64) (info Account, res bool) {
 
 	err := Db.Table("kg_account").Where("id = ?", userid).Find(&info)
 
