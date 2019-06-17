@@ -24,9 +24,9 @@ kg_redis_host =
 kg_redis_password = 
 
    短信接口 信息
-smsconf_key = f2f996a99ffbb73e52e235e0d9beabe1
-smsconf_tpl_id = 135197
-smsconf_url = "http://v.juhe.cn/sms/send"
+smsconf_key = 
+smsconf_tpl_id = 
+smsconf_url = 
 ```
 ##### 2019-06-10 
 ````
