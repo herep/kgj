@@ -177,3 +177,15 @@ func (S *KgShoplist) Iidinfo(id float64) []KgShoplist {
 		return data
 	}
 }
+
+//查询所属公司店铺名称
+func (S *KgShoplist) UseridGetSelectinfo(company_id int) (shopinfo []KgShoplist) {
+
+	sql := Db
+	sql = sql.Table("kg_shoplist").
+		Where("company_id = ?", company_id).
+		Where("status = ?", 1).
+		Where("restatus = ?", 0).Find(&shopinfo)
+
+	return
+}

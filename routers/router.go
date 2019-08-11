@@ -1,13 +1,8 @@
 package routers
 
 import (
-	"bytes"
 	"encoding/json"
-	"finance/comm"
-	_ "finance/comm"
 	"finance/controllers"
-	"finance/models"
-	_ "finance/models"
 	"finance/types"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -49,43 +44,43 @@ var FilterUser = func(ctx *context.Context) {
 		}
 	} else {
 
-		url := ctx.Input.URL() //登录--权限 获取请求路由
-		info := comm.GetTokeninfo(ctx)
-
-		//主张号 权限过滤
-		if info.AccountId != 0 {
-			da := models.Newuafiliation().SelectRoleinfo(info)
-
-			//请求路由 /v1/模块名/方法名  转化 模块名-方法名
-			var buff bytes.Buffer
-			urlinfo := strings.Split(url, "/")
-			buff.WriteString(urlinfo[2])
-			buff.WriteString("-")
-			buff.WriteString(urlinfo[3])
-			urlrole := buff.String()
-
-			// 所属角色 所有权限 -- 是否为合法访问
-			var ints int
-			for _, v := range da {
-				if strings.Index(v.RolePsCas, ",") != -1 {
-					s := strings.Split(v.RolePsCas, ",")
-					for _, v2 := range s {
-						if v2 == urlrole {
-							ints = ints + 1
-						}
-					}
-				} else {
-					if v.RolePsCas == urlrole {
-						ints = ints + 1
-					}
-				}
-			}
-
-			if ints == 0 {
-				data, _ := json.Marshal(types.Successre{Status: 400, Message: "无权限，禁止访问！", Code: -1})
-				ctx.ResponseWriter.Write(data)
-			}
-		}
+		//url := ctx.Input.URL() //登录--权限 获取请求路由
+		//info := comm.GetTokeninfo(ctx)
+		//
+		////主张号 权限过滤
+		//if info.AccountId != 0 {
+		//	da := models.Newuafiliation().SelectRoleinfo(info)
+		//
+		//	//请求路由 /v1/模块名/方法名  转化 模块名-方法名
+		//	var buff bytes.Buffer
+		//	urlinfo := strings.Split(url, "/")
+		//	buff.WriteString(urlinfo[2])
+		//	buff.WriteString("-")
+		//	buff.WriteString(urlinfo[3])
+		//	urlrole := buff.String()
+		//
+		//	// 所属角色 所有权限 -- 是否为合法访问
+		//	var ints int
+		//	for _, v := range da {
+		//		if strings.Index(v.RolePsCas, ",") != -1 {
+		//			s := strings.Split(v.RolePsCas, ",")
+		//			for _, v2 := range s {
+		//				if v2 == urlrole {
+		//					ints = ints + 1
+		//				}
+		//			}
+		//		} else {
+		//			if v.RolePsCas == urlrole {
+		//				ints = ints + 1
+		//			}
+		//		}
+		//	}
+		//
+		//	if ints == 0 {
+		//		data, _ := json.Marshal(types.Successre{Status: 400, Message: "无权限，禁止访问！", Code: -1})
+		//		ctx.ResponseWriter.Write(data)
+		//	}
+		//}
 	}
 }
 
@@ -115,6 +110,8 @@ func init() {
 	beego.Router("/v1/jurisdiction/roleinsert", &controllers.JurisdictionController{}, "post:RoleInsert")
 	beego.Router("/v1/jurisdiction/roleupdate", &controllers.JurisdictionController{}, "post:RoleUpdate")
 	beego.Router("/v1/jurisdiction/roledelect", &controllers.JurisdictionController{}, "post:RoleDelect")
+
+	beego.Router("/v1/order/getorderinfo", &controllers.OrderController{}, "post:GetOrderinfo")
 
 	beego.InsertFilter("/v1/*", beego.BeforeRouter, FilterUser)
 }
