@@ -18,6 +18,7 @@ kg_mysql_name =
 kg_mysql_password = 
 kg_mysql_host = 
 kg_mysql_dbname = 
+kg_old_mysql_dbname =
 
    redis 配置
 kg_redis_host = 
@@ -50,4 +51,8 @@ smsconf_url =
 ##### 2019-06-17
 ````
 通过路由 用户对应权限  是否合法访问1
+````
+##### 2019-08-11
+````
+列表展示接口
 ````
